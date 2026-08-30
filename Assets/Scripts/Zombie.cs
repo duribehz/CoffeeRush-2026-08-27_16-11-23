@@ -10,6 +10,8 @@ public class Zombie : MonoBehaviour
     private GameObject heldCoffee;
     public Transform handSocket;
 
+    public bool HasCoffee => heldCoffee != null;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
