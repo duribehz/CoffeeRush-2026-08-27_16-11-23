@@ -31,10 +31,15 @@ public class Customer : MonoBehaviour
     {
         served = true;
         Invoke(nameof(Leave), 0.5f);
+        if (GameManager.Instance != null)
+            GameManager.Instance.RegisterCoffeeServed();
     }
 
     private void Leave()
     {
+        if (!served && GameManager.Instance != null)
+            GameManager.Instance.RegisterCustomerLost();
+
         if (table.dropPoint.childCount > 0)
             Destroy(table.dropPoint.GetChild(0).gameObject);
 

@@ -55,7 +55,7 @@ public class Table : MonoBehaviour, IInteractable
 
     public void Interact(Zombie player)
     {
-    if (currentCustomer == null || !player.HasCoffee) return;
+    if ((GameManager.Instance != null && GameManager.Instance.IsGameFinished) || currentCustomer == null || !player.HasCoffee) return;
 
     player.Drop(dropPoint);
     currentCustomer.ReceiveCoffee();
