@@ -6,6 +6,7 @@ public class Zombie : MonoBehaviour
     public float speed = 5f;
     public float rotationSpeed = 10f;
     private Rigidbody rb;
+    private Animator animator;
     private Vector3 movement;
 
     private readonly List<IInteractable> nearbyInteractables = new();
@@ -18,6 +19,7 @@ public class Zombie : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
         rb.freezeRotation = true;
     }
 
@@ -28,6 +30,7 @@ public class Zombie : MonoBehaviour
         float z = Input.GetAxisRaw("Vertical");
 
         movement = new Vector3(x, 0f, z).normalized;
+        animator.SetFloat("Speed", movement.sqrMagnitude);
 
         IInteractable interactable = GetClosestInteractable();
         if (Input.GetKeyDown(KeyCode.F) && interactable != null)
@@ -90,6 +93,7 @@ public class Zombie : MonoBehaviour
         heldCoffee.transform.SetParent(handSocket);
         heldCoffee.transform.localPosition = Vector3.zero;
         heldCoffee.transform.localRotation = Quaternion.identity;
+        animator.SetBool("HasCoffee", true);
     }
 
     public void Drop(Transform dropPoint)
@@ -99,5 +103,6 @@ public class Zombie : MonoBehaviour
         heldCoffee.transform.localPosition = Vector3.zero;
         heldCoffee.transform.localRotation = Quaternion.identity;
         heldCoffee = null;
+        animator.SetBool("HasCoffee", false);
     }
 }

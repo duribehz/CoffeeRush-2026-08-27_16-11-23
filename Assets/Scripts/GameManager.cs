@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,20 +9,48 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI coffeesLabel;
     [SerializeField] private TextMeshProUGUI lostCustomersLabel;
+    [SerializeField] private GameObject startOverlay;
+    [SerializeField] private Button startButton;
+    [SerializeField] private Button pauseButton;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button restartButton;
+    [SerializeField] private CanvasGroup resultOverlay;
+    [SerializeField] private TextMeshProUGUI resultTitle;
+    [SerializeField] private TextMeshProUGUI resultDescription;
+    [SerializeField] private Button resultRestartButton;
+    [SerializeField] private Animator resultAnimator;
 
     private const int TargetCoffees = 10;
     private const int MaxLostCustomers = 10;
 
     private int coffeesServed;
     private int customersLost;
+    private bool gameStarted;
+    private bool isPaused;
     private bool gameFinished;
 
     public bool IsGameFinished => gameFinished;
+    public bool CanInteract => gameStarted && !isPaused && !gameFinished;
 
     private void Awake()
     {
         Instance = this;
+        startButton.onClick.AddListener(StartGame);
+        pauseButton.onClick.AddListener(PauseGame);
+        resumeButton.onClick.AddListener(ResumeGame);
+        restartButton.onClick.AddListener(RestartGame);
+        resultRestartButton.onClick.AddListener(RestartGame);
+        resultOverlay.alpha = 0f;
+        resultOverlay.interactable = false;
+        resultOverlay.blocksRaycasts = false;
         UpdateHud();
+        gameStarted = false;
+        isPaused = true;
+        startOverlay.SetActive(true);
+        pauseButton.gameObject.SetActive(false);
+        resumeButton.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(false);
+        Time.timeScale = 0f;
     }
 
     private void Update()
@@ -41,6 +70,39 @@ public class GameManager : MonoBehaviour
             FinishGame(true);
     }
 
+    public void StartGame()
+    {
+        if (gameFinished) return;
+
+        gameStarted = true;
+        isPaused = false;
+        startOverlay.SetActive(false);
+        pauseButton.gameObject.SetActive(true);
+        resumeButton.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(true);
+        Time.timeScale = 1f;
+    }
+
+    public void PauseGame()
+    {
+        if (!gameStarted || gameFinished) return;
+
+        isPaused = true;
+        pauseButton.gameObject.SetActive(false);
+        resumeButton.gameObject.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void ResumeGame()
+    {
+        if (!gameStarted || gameFinished) return;
+
+        isPaused = false;
+        pauseButton.gameObject.SetActive(true);
+        resumeButton.gameObject.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
     public void RegisterCustomerLost()
     {
         if (gameFinished) return;
@@ -55,14 +117,21 @@ public class GameManager : MonoBehaviour
     private void FinishGame(bool won)
     {
         gameFinished = true;
-        coffeesLabel.text = won ? "SERVICIO COMPLETADO" : "DEMASIADOS CLIENTES SE FUERON";
-        lostCustomersLabel.text = won
-            ? "Entregaste 10 cafes. Pulsa R para reintentar."
-            : "Se fueron 10 clientes. Pulsa R para reintentar.";
+        isPaused = true;
+        pauseButton.gameObject.SetActive(false);
+        resumeButton.gameObject.SetActive(false);
+        resultTitle.text = won ? "SERVICIO COMPLETADO" : "FIN DEL TURNO";
+        resultTitle.color = won ? new Color(0.68f, 0.4f, 0.14f) : new Color(0.52f, 0.25f, 0.22f);
+        resultDescription.text = won
+            ? "Entregaste 10 cafes y completaste el servicio."
+            : "Se fueron 10 clientes. Intenta atenderlos mas rapido.";
+        resultOverlay.interactable = true;
+        resultOverlay.blocksRaycasts = true;
+        resultAnimator.SetTrigger(won ? "Win" : "Lose");
         Time.timeScale = 0f;
     }
 
-    private void RestartGame()
+    public void RestartGame()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

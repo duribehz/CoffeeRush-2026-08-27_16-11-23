@@ -6,7 +6,7 @@ public class CoffeeBar : MonoBehaviour, IInteractable
 
     public void Interact(Zombie player)
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
+        if (GameManager.Instance != null && !GameManager.Instance.CanInteract) return;
 
         GameObject coffee = Instantiate(coffeePrefab);
         player.PickUp(coffee);

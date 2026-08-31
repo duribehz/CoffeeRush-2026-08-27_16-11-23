@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2413887886096983906}
   - component: {fileID: 424986295336895254}
   - component: {fileID: 8108329790786059641}
+  - component: {fileID: 6874658482590536495}
   m_Layer: 0
   m_Name: Zombie
   m_TagString: Untagged
@@ -35,7 +36,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1882238748919078744}
-  - {fileID: 6118727977424002608}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5777856098095278147
@@ -156,7 +156,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Zombie
   speed: 5
+  rotationSpeed: 10
   handSocket: {fileID: 6118727977424002608}
+--- !u!95 &6874658482590536495
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342691967531900177}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d4eac8fb39b23c8ab8d9485c53d5f57c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8977462926062360695
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,11 +205,11 @@ Transform:
   m_GameObject: {fileID: 8977462926062360695}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.3, z: 0.6}
+  m_LocalPosition: {x: 0, y: -0.65, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1541736518174206881}
+  m_Father: {fileID: 7417917026416302186}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2131811578984626355
 PrefabInstance:
@@ -254,11 +277,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8891244130364874969, guid: 7009dda5ffd09758690dce00e51042d8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6118727977424002608}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7009dda5ffd09758690dce00e51042d8, type: 3}
 --- !u!4 &1882238748919078744 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7009dda5ffd09758690dce00e51042d8, type: 3}
+  m_PrefabInstance: {fileID: 2131811578984626355}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7417917026416302186 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8891244130364874969, guid: 7009dda5ffd09758690dce00e51042d8, type: 3}
   m_PrefabInstance: {fileID: 2131811578984626355}
   m_PrefabAsset: {fileID: 0}
