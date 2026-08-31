@@ -42,6 +42,13 @@ public class Table : MonoBehaviour, IInteractable
         Transform parent = spawnPoint != null ? spawnPoint : transform;
         GameObject customerObj = Instantiate(customerPrefab, parent.position, parent.rotation, parent);
 
+        Vector3 parentScale = parent.lossyScale;
+        customerObj.transform.localScale = new Vector3(
+            1f / parentScale.x,
+            1f / parentScale.y,
+            1f / parentScale.z
+        );
+
         currentCustomer = customerObj.GetComponent<Customer>();
         currentCustomer.Init(this);
     }
