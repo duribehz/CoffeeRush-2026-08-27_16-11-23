@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +20,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI resultDescription;
     [SerializeField] private Button resultRestartButton;
     [SerializeField] private Animator resultAnimator;
+    [SerializeField] private ParticleSystem confettiFx;
+    [SerializeField] private ParticleSystem smokeFx;
 
     private const int TargetCoffees = 10;
     private const int MaxLostCustomers = 10;
@@ -120,14 +123,32 @@ public class GameManager : MonoBehaviour
         isPaused = true;
         pauseButton.gameObject.SetActive(false);
         resumeButton.gameObject.SetActive(false);
-        resultTitle.text = won ? "SERVICIO COMPLETADO" : "FIN DEL TURNO";
+        resultTitle.text = won ? "Victory!" : "Game over";
         resultTitle.color = won ? new Color(0.68f, 0.4f, 0.14f) : new Color(0.52f, 0.25f, 0.22f);
         resultDescription.text = won
-            ? "Entregaste 10 cafes y completaste el servicio."
-            : "Se fueron 10 clientes. Intenta atenderlos mas rapido.";
+            ? "You served 10 coffees and completed the shift."
+            : "10 customers left. Try serving them faster.";
         resultOverlay.interactable = true;
         resultOverlay.blocksRaycasts = true;
         resultAnimator.SetTrigger(won ? "Win" : "Lose");
+        if (confettiFx != null) confettiFx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (smokeFx != null) smokeFx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        ParticleSystem resultFx = won ? confettiFx : smokeFx;
+        if (resultFx != null) resultFx.Play();
+        StartCoroutine(FreezeAfterResultAnimation());
+    }
+
+    private IEnumerator FreezeAfterResultAnimation()
+    {
+        float duration = 0.4f;
+        if (resultAnimator != null && resultAnimator.runtimeAnimatorController != null)
+        {
+            AnimatorStateInfo state = resultAnimator.GetCurrentAnimatorStateInfo(0);
+            if (0f < state.length)
+                duration = Mathf.Max(duration, state.length);
+        }
+
+        yield return new WaitForSecondsRealtime(duration);
         Time.timeScale = 0f;
     }
 
@@ -139,7 +160,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateHud()
     {
-        coffeesLabel.text = "<size=55%>Cafes servidos</size>\n" + coffeesServed + " <size=65%>/ " + TargetCoffees + "</size>";
-        lostCustomersLabel.text = "<size=55%>Clientes perdidos</size>\n" + customersLost + " <size=65%>/ " + MaxLostCustomers + "</size>";
+        coffeesLabel.text = "<size=55%>Customers Lost</size>\n" + coffeesServed + " <size=65%>/ " + TargetCoffees + "</size>";
+        lostCustomersLabel.text = "<size=55%>Customers Lost</size>\n" + customersLost + " <size=65%>/ " + MaxLostCustomers + "</size>";
     }
 }

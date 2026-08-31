@@ -4,6 +4,7 @@ using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using Coffee.UIExtensions;
 
 public static class ResultScreenSetup
 {
@@ -122,16 +123,138 @@ public static class ResultScreenSetup
         Button restart = CreateButton("Result Restart Button", card.transform, "Reiniciar");
         SetRect(restart.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 68f), new Vector2(250f, 64f));
 
+        ParticleSystem confettiFx = CreateFx("Confetti FX", overlay.transform, new Vector2(0f, 235f), true);
+        ParticleSystem smokeFx = CreateFx("Smoke FX", overlay.transform, new Vector2(0f, -205f), false);
+
         SerializedObject serializedManager = new SerializedObject(manager);
         serializedManager.FindProperty("resultOverlay").objectReferenceValue = canvasGroup;
         serializedManager.FindProperty("resultTitle").objectReferenceValue = title;
         serializedManager.FindProperty("resultDescription").objectReferenceValue = description;
         serializedManager.FindProperty("resultRestartButton").objectReferenceValue = restart;
         serializedManager.FindProperty("resultAnimator").objectReferenceValue = animator;
+        serializedManager.FindProperty("confettiFx").objectReferenceValue = confettiFx;
+        serializedManager.FindProperty("smokeFx").objectReferenceValue = smokeFx;
         serializedManager.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
         EditorSceneManager.SaveScene(manager.gameObject.scene);
+    }
+
+    private static ParticleSystem CreateFx(string name, Transform parent, Vector2 position, bool confetti)
+    {
+        GameObject root = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
+        root.transform.SetParent(parent, false);
+        RectTransform rootRect = root.GetComponent<RectTransform>();
+        rootRect.anchorMin = new Vector2(0.5f, 0.5f);
+        rootRect.anchorMax = new Vector2(0.5f, 0.5f);
+        rootRect.anchoredPosition = position;
+        rootRect.sizeDelta = new Vector2(20f, 20f);
+
+        UIParticle uiParticle = root.AddComponent<UIParticle>();
+        uiParticle.raycastTarget = false;
+        uiParticle.useCustomView = true;
+        uiParticle.customViewSize = 60f;
+
+        GameObject system = new GameObject("System", typeof(ParticleSystem));
+        system.transform.SetParent(root.transform, false);
+        ParticleSystem ps = system.GetComponent<ParticleSystem>();
+        ConfigureFx(ps, confetti);
+        return ps;
+    }
+
+    private static void ConfigureFx(ParticleSystem ps, bool confetti)
+    {
+        Material softParticle = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Particle.mat");
+        ParticleSystemRenderer renderer = ps.GetComponent<ParticleSystemRenderer>();
+        if (softParticle != null)
+            renderer.sharedMaterial = softParticle;
+
+        ParticleSystem.MainModule main = ps.main;
+        main.loop = false;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.useUnscaledTime = true;
+
+        if (confetti)
+        {
+            main.duration = 2.6f;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(1.1f, 1.7f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(12f, 25f);
+            main.startSize = new ParticleSystem.MinMaxCurve(2.5f, 4f);
+            main.startColor = new ParticleSystem.MinMaxGradient(
+                new Color(0.97f, 0.79f, 0.35f, 1f),
+                new Color(0.70f, 0.42f, 0.18f, 1f));
+            main.gravityModifier = 8f;
+            main.maxParticles = 200;
+
+            ParticleSystem.EmissionModule emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 70) });
+
+            ParticleSystem.ShapeModule shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 24f;
+            shape.radius = 0.2f;
+
+            ParticleSystem.RotationOverLifetimeModule rotation = ps.rotationOverLifetime;
+            rotation.enabled = true;
+            rotation.separateAxes = true;
+            rotation.z = new ParticleSystem.MinMaxCurve(-360f, 360f);
+        }
+        else
+        {
+            main.duration = 2.2f;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(1.6f, 2.4f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 8f);
+            main.startSize = new ParticleSystem.MinMaxCurve(10f, 18f);
+            main.startColor = new Color(0.33f, 0.25f, 0.21f, 0.8f);
+            main.gravityModifier = -2f;
+            main.maxParticles = 60;
+
+            ParticleSystem.EmissionModule emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 26) });
+
+            ParticleSystem.ShapeModule shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.3f;
+
+            ParticleSystem.SizeOverLifetimeModule size = ps.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, GrowCurve());
+        }
+
+        ApplyFade(ps, confetti ? 0.72f : 0.4f);
+    }
+
+    private static void ApplyFade(ParticleSystem ps, float fadeStart)
+    {
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new[]
+            {
+                new GradientColorKey(Color.white, 0f),
+                new GradientColorKey(Color.white, fadeStart),
+                new GradientColorKey(Color.white, 1f),
+            },
+            new[]
+            {
+                new GradientAlphaKey(1f, 0f),
+                new GradientAlphaKey(1f, fadeStart),
+                new GradientAlphaKey(0f, 1f),
+            });
+
+        ParticleSystem.ColorOverLifetimeModule color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = new ParticleSystem.MinMaxGradient(gradient);
+    }
+
+    private static AnimationCurve GrowCurve()
+    {
+        return new AnimationCurve(
+            new Keyframe(0f, 0.65f),
+            new Keyframe(0.5f, 1f),
+            new Keyframe(1f, 1.55f));
     }
 
     private static GameObject CreateImage(string name, Transform parent, Color color)
