@@ -30,7 +30,7 @@ public class Customer : MonoBehaviour
     public void ReceiveCoffee()
     {
         served = true;
-        Invoke(nameof(Leave), 1f);
+        Invoke(nameof(Leave), 0.5f);
     }
 
     private void Leave()
